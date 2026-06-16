@@ -3,7 +3,7 @@ import random
 import sys
 import pygame as pg
 import time
-
+import math
 
 WIDTH, HEIGHT = 1100, 650
 DELTA = {
@@ -22,6 +22,16 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     if rct.top < 0 or HEIGHT < rct.bottom:  
         tate = False
     return yoko, tate
+def calc_orientation(
+    org: pg.Rect,
+    dst: pg.Rect
+) -> tuple[float, float]:
+    dx = dst.centerx - org.centerx
+    dy = dst.centery - org.centery
+
+    norm = math.sqrt(dx**2 + dy**2)
+
+    return dx / norm, dy / norm
 def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
     img = pg.transform.rotozoom(
         pg.image.load("fig/3.png"),
@@ -139,14 +149,11 @@ def main():
         bb_rct.width = bb_img.get_width()
         bb_rct.height = bb_img.get_height()
 
-        avx = vx * bb_accs[idx]
-        avy = vy * bb_accs[idx]
-        bb_rct.move_ip(avx, avy)
-        yoko, tate = check_bound(bb_rct)
-        if not yoko: 
-            vx *= -1
-        if not tate:  
-            vy *= -1
+        vx = vx * bb_accs[idx]
+        vy = vy * bb_accs[idx]
+        vx, vy = calc_orientation(bb_rct, kk_rct)
+
+        bb_rct.move_ip(vx * 5, vy * 5)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
