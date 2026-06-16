@@ -60,13 +60,9 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         img = pg.Surface((20*r, 20*r))
         pg.draw.circle(
             img,
-            (255, 0, 0),
-            (10*r, 10*r),
-            10*r
-        )
+            (255, 0, 0),(10*r, 10*r),10*r)
         img.set_colorkey((0, 0, 0))
         bb_imgs.append(img)
-
     bb_accs = [a for a in range(1, 11)]
 
     return bb_imgs, bb_accs
@@ -88,8 +84,6 @@ def gameover(screen: pg.Surface) -> None:
 
     left_rct = cry_img.get_rect()
     right_rct = cry_img.get_rect()
-
-
     left_rct.center = (WIDTH//2 - 250, HEIGHT//2)
     right_rct.center = (WIDTH//2 + 250, HEIGHT//2)
 
@@ -143,23 +137,17 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  
         screen.blit(kk_img, kk_rct)
         idx = min(tmr // 500, 9)
-
         bb_img = bb_imgs[idx]
-
         bb_rct.width = bb_img.get_width()
         bb_rct.height = bb_img.get_height()
-
         vx = vx * bb_accs[idx]
         vy = vy * bb_accs[idx]
         vx, vy = calc_orientation(bb_rct, kk_rct)
-
         bb_rct.move_ip(vx * 5, vy * 5)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
         clock.tick(50)
-
-
 if __name__ == "__main__":
     pg.init()
     main()
