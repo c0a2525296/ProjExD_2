@@ -22,6 +22,26 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     if rct.top < 0 or HEIGHT < rct.bottom:  
         tate = False
     return yoko, tate
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    img = pg.transform.rotozoom(
+        pg.image.load("fig/3.png"),
+        0,
+        0.9
+    )
+
+    return {
+        (0, 0): img,
+        (-5, 0): img,
+        (5, 0): pg.transform.flip(img, True, False),
+        (0, -5): pg.transform.rotozoom(img, -90, 1.0),
+        (0, 5): pg.transform.rotozoom(img, 90, 1.0),
+        (-5, -5): pg.transform.rotozoom(img, -45, 1.0),
+        (-5, 5): pg.transform.rotozoom(img, 45, 1.0),
+        (5, -5): pg.transform.flip(
+            pg.transform.rotozoom(img, -45, 1.0),True,False),
+        (5, 5): pg.transform.flip(
+            pg.transform.rotozoom(img, 45, 1.0),True,False),
+    }
     
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     bb_imgs = []
@@ -77,6 +97,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_imgs = get_kk_imgs()
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     bb_imgs, bb_accs = init_bb_imgs()
@@ -106,6 +127,7 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += mv[0]  
                 sum_mv[1] += mv[1] 
+        kk_img = kk_imgs.get(tuple(sum_mv), kk_imgs[(0, 0)])
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  
