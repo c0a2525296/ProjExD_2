@@ -22,10 +22,8 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     if rct.top < 0 or HEIGHT < rct.bottom:  
         tate = False
     return yoko, tate
+    
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
-    """
-    爆弾画像と加速度リストを生成する
-    """
     bb_imgs = []
 
     for r in range(1, 11):
@@ -112,7 +110,16 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  
         screen.blit(kk_img, kk_rct)
-        bb_rct.move_ip(vx, vy)
+        idx = min(tmr // 500, 9)
+
+        bb_img = bb_imgs[idx]
+
+        bb_rct.width = bb_img.get_width()
+        bb_rct.height = bb_img.get_height()
+
+        avx = vx * bb_accs[idx]
+        avy = vy * bb_accs[idx]
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko: 
             vx *= -1
