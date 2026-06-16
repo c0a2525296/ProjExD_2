@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import pygame as pg
+import time
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -16,11 +17,61 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     yoko, tate = True, True
-    if rct.left < 0 or WIDTH < rct.right:  # 横方向判定
+    if rct.left < 0 or WIDTH < rct.right:  
         yoko = False
-    if rct.top < 0 or HEIGHT < rct.bottom:  # 縦方向判定
+    if rct.top < 0 or HEIGHT < rct.bottom:  
         tate = False
     return yoko, tate
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    爆弾画像と加速度リストを生成する
+    """
+    bb_imgs = []
+
+    for r in range(1, 11):
+        img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(
+            img,
+            (255, 0, 0),
+            (10*r, 10*r),
+            10*r
+        )
+        img.set_colorkey((0, 0, 0))
+        bb_imgs.append(img)
+
+    bb_accs = [a for a in range(1, 11)]
+
+    return bb_imgs, bb_accs
+def gameover(screen: pg.Surface) -> None:
+    black = pg.Surface((WIDTH, HEIGHT))
+    black.fill((0, 0, 0))
+    black.set_alpha(200)
+
+    font = pg.font.Font(None, 80)
+    txt = font.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect()
+    txt_rct.center = (WIDTH//2, HEIGHT//2)
+
+    cry_img = pg.transform.rotozoom(
+    pg.image.load("fig/8.png"),
+    0,
+    0.9
+)
+
+    left_rct = cry_img.get_rect()
+    right_rct = cry_img.get_rect()
+
+
+    left_rct.center = (WIDTH//2 - 250, HEIGHT//2)
+    right_rct.center = (WIDTH//2 + 250, HEIGHT//2)
+
+    black.blit(cry_img, left_rct)
+    black.blit(txt, txt_rct)
+    black.blit(cry_img, right_rct)
+
+    screen.blit(black, (0, 0))
+    pg.display.update()
+    time.sleep(5)
 
 
 def main():
@@ -30,7 +81,8 @@ def main():
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
-
+    bb_imgs, bb_accs = init_bb_imgs()
+    bb_img = bb_imgs[0]
     bb_img = pg.Surface((20, 20)) 
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10) 
     bb_img.set_colorkey((0, 0, 0))
@@ -45,6 +97,9 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+        if kk_rct.colliderect(bb_rct):  
+            gameover(screen)
+            return
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
@@ -57,12 +112,11 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  
         screen.blit(kk_img, kk_rct)
-
         bb_rct.move_ip(vx, vy)
         yoko, tate = check_bound(bb_rct)
-        if not yoko:  # 横方向にはみ出ていたら
+        if not yoko: 
             vx *= -1
-        if not tate:  # 縦方向にはみ出ていたら
+        if not tate:  
             vy *= -1
         screen.blit(bb_img, bb_rct)
         pg.display.update()
